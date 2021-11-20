@@ -1,5 +1,0 @@
-package rdd
-
-object TotalAmountSpent {
-
-}
