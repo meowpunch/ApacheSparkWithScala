@@ -1,4 +1,10 @@
 .idea
 .bsp
 .DS_Store
+
+# source data
 data
+
+# build
+project
+target
