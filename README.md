@@ -20,7 +20,7 @@
 ## Exercise
 ### Predict Real Estate Values with Decision Tree
 predict the price per unit area base on several features
-- features(X): TransactionDate, HouseAge, DistanceToMRT, NumberConvenienceStores, Latitude, Longitude
+- features(X): HouseAge, DistanceToMRT, NumberConvenienceStores, Latitude, Longitude
 - label(y): PriceOfUnitArea
 
 

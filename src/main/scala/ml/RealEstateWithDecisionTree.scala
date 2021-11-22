@@ -1,10 +1,10 @@
 package ml
 
 import org.apache.log4j._
+import org.apache.spark.ml.evaluation.RegressionEvaluator
 import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.ml.regression.LinearRegression
+import org.apache.spark.ml.regression.DecisionTreeRegressor
 import org.apache.spark.sql._
-import org.apache.spark.sql.types._
 
 object RealEstateWithDecisionTree {
 
@@ -24,7 +24,7 @@ object RealEstateWithDecisionTree {
       .getOrCreate()
 
     // Load up our page speed / amount spent data in the format required by MLLib
-    // (which is label, vector of features)
+    // (which is label, vector of  features)
 
     import spark.implicits._
     val dsRaw = spark.read
@@ -34,37 +34,38 @@ object RealEstateWithDecisionTree {
       .as[RealEstate]
 
     val assembler = new VectorAssembler().
-      setInputCols(Array("TransactionDate", "HouseAge", "DistanceToMRT", "NumberConvenienceStores", "Latitude", "Longitude")).
+      setInputCols(Array("HouseAge", "DistanceToMRT", "NumberConvenienceStores", "Latitude", "Longitude")).
       setOutputCol("features")
 
     val df = assembler.transform(dsRaw)
-      .select("PriceOfUnitArea", "features")
+      .select("features", "PriceOfUnitArea")
+      .withColumnRenamed("PriceOfUnitArea", "label")
 
     df.show()
 
     // Let's split our data into training data and testing data
-    val Array(trainingDF, testDF) = df.randomSplit(Array(0.8, 0.2))
+    val Array(trainingDF, testDF) = df.randomSplit(Array(0.7, 0.3))
 
     // Now create our linear regression model
-    val lir = new LinearRegression()
-      .setLabelCol("PriceOfUnitArea")
+    val lir = new DecisionTreeRegressor()
+      .setFeaturesCol("features")
+      .setLabelCol("label")
 
     // Train the model using our training data
     val model = lir.fit(trainingDF)
 
-    // Now see if we can predict values in our test data.
-    // Generate predictions using our linear regression model for all features in our 
     // test dataframe:
-    val fullPredictions = model.transform(testDF).cache()
-    fullPredictions.show()
+    val predictions = model.transform(testDF).cache()
+    predictions.show()
 
-    // Extract the predictions and the "known" correct labels.
-    val predictionAndLabel = fullPredictions.select("prediction", "PriceOfUnitArea").collect()
-
-    // Print out the predicted and actual values for each point
-    for (prediction <- predictionAndLabel) {
-      println(prediction)
-    }
+    // Select (prediction, true label) and compute test error.
+    val evaluator = new RegressionEvaluator()
+      .setLabelCol("label")
+      .setPredictionCol("prediction")
+      .setMetricName("rmse")
+    val rmse = evaluator.evaluate(predictions)
+    println(s"Root Mean Squared Error (RMSE) on test data = $rmse")
+    println(s"Learned regression tree model:\n ${model.toDebugString}")
 
     // Stop the session
     spark.stop()
