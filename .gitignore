@@ -2,8 +2,9 @@
 .bsp
 .DS_Store
 
-# source data
+# data
 data
+checkpoint
 
 # build
 project
