@@ -7,7 +7,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{IntegerType, StringType, StructType}
 
 /** Find the superhero with the most co-appearances. */
-object MostObscureSuperheroDataset {
+object MostObscureSuperhero {
 
   // Function to extract the hero ID and number of connections from each line
   def countCoOccurrences(line: String): (Int, Int) = {
@@ -42,10 +42,10 @@ object MostObscureSuperheroDataset {
       .as[SuperHero]
 
     // Load up the superhero co-appearance data
-    val lines = spark.sparkContext.textFile("data/Marvel-graph.txt")
+    val linesRDD = spark.sparkContext.textFile("data/Marvel-graph.txt")
 
     // Convert to (heroID, number of connections) Dataset and sum by Id
-    val connections = lines.map(countCoOccurrences).toDF("id", "connections")
+    val connections = linesRDD.map(countCoOccurrences).toDF("id", "connections")
       .groupBy("id").agg(sum("connections").alias("connections"))
 
     // Compute the actual smallest number of connections in the dataset
