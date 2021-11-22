@@ -4,8 +4,8 @@ version := "0.1"
 
 scalaVersion := "2.12.12"
 
-val sparkVersion = "3.1.2"
-val twitterVersion = "4.0.7"
+val sparkVersion = "3.0.0"
+val twitterVersion = "4.0.4"
 
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % sparkVersion,
