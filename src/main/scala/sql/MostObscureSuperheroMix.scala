@@ -1,13 +1,12 @@
-package mix
+package sql
 
-import org.apache.log4j._
-import org.apache.spark.SparkContext
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.{min, sum}
 import org.apache.spark.sql.types.{IntegerType, StringType, StructType}
 
 /** Find the superhero with the most co-appearances. */
-object MostObscureSuperhero {
+object MostObscureSuperheroMix {
 
   // Function to extract the hero ID and number of connections from each line
   def countCoOccurrences(line: String): (Int, Int) = {
@@ -26,7 +25,7 @@ object MostObscureSuperhero {
     // Create a SparkSession using every core of the local machine
     val spark = SparkSession
       .builder
-      .appName("MostPopularSuperhero")
+      .appName("MostObscureSuperhero")
       .master("local[*]")
       .getOrCreate()
 
